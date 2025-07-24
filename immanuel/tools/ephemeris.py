@@ -617,7 +617,7 @@ def _get_point(
         return _get_syzygy(jd)
 
     if index in (chart.PART_OF_FORTUNE, chart.PART_OF_SPIRIT, chart.PART_OF_EROS):
-        return _get_part(index, jd, lat, lon, part_formula, armc, armc_obliquity)
+        return _get_part(index, jd, lat, lon, part_formula, armc, armc_obliquity, house_system)
 
     return _get_swisseph_point(index, jd)
 
@@ -665,15 +665,16 @@ def _get_part(
     formula: int,
     armc: float | None = None,
     armc_obliquity: float | None = None,
+    house_system: int | None = chart.PLACIDUS,
 ) -> dict:
     """Calculates Parts of Fortune, Spirit, and Eros."""
     sun = get_planet(chart.SUN, jd)
     moon = get_planet(chart.MOON, jd)
     venus = get_planet(chart.VENUS, jd) if index == chart.PART_OF_EROS else None
     asc = (
-        get_angle(chart.ASC, jd, lat, lon, chart.PLACIDUS)
+        get_angle(chart.ASC, jd, lat, lon, house_system)
         if armc is None
-        else get_armc_angle(chart.ASC, armc, lat, armc_obliquity, chart.PLACIDUS)
+        else get_armc_angle(chart.ASC, armc, lat, armc_obliquity, house_system)
     )
     lon = part_longitude(index, sun, moon, asc, venus, formula)
     dec = swe.cotrans((lon, 0, 0), -earth_obliquity(jd))[1]
